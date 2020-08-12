@@ -1,9 +1,10 @@
 import re
+
 from typing import Union
 from django.contrib.auth import authenticate, get_user_model
 from django.http import HttpRequest
 
-from chowkidar.utils.exceptions import AuthError
+from ..utils.exceptions import AuthError
 
 UserModel = get_user_model()
 
@@ -31,7 +32,7 @@ def authenticate_with_email(password: str, email: str, request: HttpRequest = No
         )
 
 
-def get_user_from_credentials(
+def authenticate_user_from_credentials(
     password: str, username: str = None, email: str = None, request: HttpRequest = None
 ) -> UserModel:
     if username is None:
@@ -50,5 +51,5 @@ def get_user_from_credentials(
 
 
 __all__ = [
-    'get_user_from_credentials'
+    'authenticate_user_from_credentials',
 ]

@@ -10,5 +10,9 @@ JWT_ALGORITHM = settings.JWT_ALGORITHM if hasattr(settings, 'JWT_ALGORITHM') els
 JWT_EXPIRATION_DELTA = (
     settings.JWT_EXPIRATION_DELTA if hasattr(settings, 'JWT_EXPIRATION_DELTA') else timedelta(seconds=60 * 5)
 )
+JWT_REFRESH_TOKEN_EXPIRATION_DELTA = (
+    settings.JWT_REFRESH_TOKEN_EXPIRATION_DELTA if hasattr(settings, 'JWT_REFRESH_TOKEN_EXPIRATION_DELTA')
+    else timedelta(seconds=60 * 60 * 24 * 7)
+)
 JWT_LEEWAY = settings.JWT_LEEWAY if hasattr(settings, 'JWT_LEEWAY') else 0
 JWT_ISSUER = settings.JWT_ISSUER if hasattr(settings, 'JWT_ISSUER') else None

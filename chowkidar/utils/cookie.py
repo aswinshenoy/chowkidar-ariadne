@@ -1,5 +1,5 @@
 from datetime import datetime
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 
 
 def set_cookie(
@@ -7,7 +7,7 @@ def set_cookie(
     value: str,
     response: HttpResponse,
     expires: datetime,
-) -> HttpResponse:
+) -> (HttpResponse or JsonResponse):
     """ Sets a cookie through HTTP Response """
     response.set_cookie(
         key=key,

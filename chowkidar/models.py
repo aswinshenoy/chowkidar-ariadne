@@ -5,6 +5,7 @@ from django.db import models
 from django.conf import settings
 from chowkidar.settings import JWT_REFRESH_TOKEN_N_BYTES
 
+
 class AbstractRefreshToken(models.Model):
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(
@@ -14,7 +15,7 @@ class AbstractRefreshToken(models.Model):
         editable=False
     )
     token = models.CharField(max_length=255, editable=False)
-    created = models.DateTimeField(auto_now_add=True, editable=False)
+    issued = models.DateTimeField(auto_now_add=True, editable=False)
     revoked = models.DateTimeField(null=True, blank=True)
 
     @staticmethod

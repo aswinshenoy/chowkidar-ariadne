@@ -1,0 +1,12 @@
+extend type Mutation {
+
+    tokenCreate(
+        "Email address of the user"
+        email: String
+        "Username of the user"
+        username: String
+        "Password of the user"
+        password: String!
+    ): GenerateTokenResponse
+
+}

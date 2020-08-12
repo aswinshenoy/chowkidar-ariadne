@@ -1,0 +1,13 @@
+type AuthenticatedUser {
+    id: String
+    username: String
+    firstName: String
+    lastName: String
+}
+
+type GenerateTokenResponse {
+    success: Boolean
+    payload: String
+    refreshExpiresIn: String
+    user: AuthenticatedUser
+}
