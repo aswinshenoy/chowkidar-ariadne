@@ -3,9 +3,10 @@ from datetime import datetime
 from django.http import HttpRequest, JsonResponse
 from django.contrib.auth import get_user_model
 
+from .revoke import revoke_refresh_token
 from ..settings import JWT_REFRESH_TOKEN_EXPIRATION_DELTA, JWT_EXPIRATION_DELTA
 from ..utils import generate_refresh_token, generate_token_from_claims, decode_payload_from_token
-from ..utils.cookie import set_cookie
+from ..utils.cookie import set_cookie, delete_cookie
 
 UserModel = get_user_model()
 
@@ -13,6 +14,55 @@ UserModel = get_user_model()
 def respond_handling_authentication(
     request: HttpRequest, result: object, status_code
 ) -> JsonResponse:
+
+    if status_code == 200 and result['data']:
+        # Issue Token if query is authenticateUser and successful
+        if (
+                'authenticateUser' in result['data'] and
+                result['data']['authenticateUser']['success'] and
+                result['data']['authenticateUser']['user']['id']
+        ):
+            user = UserModel.objects.get(id=result['data']['authenticateUser']['user']['id'])
+            refreshToken = generate_refresh_token(user=user)
+            data = generate_token_from_claims(claims={
+                'userID': user.id, 'username': user.username, 'origIat': refreshToken.issued.timestamp(),
+            })
+            refreshExpiresIn = timezone.now() + JWT_REFRESH_TOKEN_EXPIRATION_DELTA
+            result['data']['authenticateUser']['payload'] = data['payload']
+            result['data']['authenticateUser']['refreshExpiresIn'] = refreshExpiresIn
+            resp = JsonResponse(result, status=status_code)
+
+            # Set JWT Token
+            JWTExpiry = datetime.fromtimestamp(data['payload']['exp'])
+            resp = set_cookie(
+                key='JWT_TOKEN',
+                value=data['token'],
+                expires=JWTExpiry,
+                response=resp
+            )
+            # Set JWT Refresh Token
+            resp = set_cookie(
+                key='JWT_REFRESH_TOKEN',
+                value=refreshToken.get_token(),
+                expires=refreshExpiresIn,
+                response=resp
+            )
+            return resp
+        # Revoke Token if query is logoutUser and successful
+        if (
+            'logoutUser' in result['data'] and
+            result['data']['logoutUser']
+        ):
+            if 'JWT_REFRESH_TOKEN' in request.COOKIES:
+                refreshToken = request.COOKIES["JWT_REFRESH_TOKEN"]
+                try:
+                    revoke_refresh_token(refreshToken)
+                except Exception:
+                    pass
+                resp = JsonResponse(result, status=status_code)
+                resp = delete_cookie(key='JWT_REFRESH_TOKEN', response=resp)
+                resp = delete_cookie(key='JWT_TOKEN', response=resp)
+                return resp
 
     # Refresh Token automatically if token exists
     if 'JWT_REFRESH_TOKEN' in request.COOKIES:
@@ -42,42 +92,11 @@ def respond_handling_authentication(
             )
             return resp
         except Exception:
-            #@todo delete all JWT Tokens
-            pass
-
-    # Issue Token if query is tokenCreate and successful
-    if status_code == 200 and result['data']:
-        if (
-            'tokenCreate' in result['data'] and
-            result['data']['tokenCreate']['success'] and
-            result['data']['tokenCreate']['user']['id']
-        ):
-            user = UserModel.objects.get(id=result['data']['tokenCreate']['user']['id'])
-            refreshToken = generate_refresh_token(user=user)
-            data = generate_token_from_claims(claims={
-                'userID': user.id, 'username': user.username, 'origIat': refreshToken.issued.timestamp(),
-            })
-            refreshExpiresIn = timezone.now() + JWT_REFRESH_TOKEN_EXPIRATION_DELTA
-            result['data']['tokenCreate']['payload'] = data['payload']
-            result['data']['tokenCreate']['refreshExpiresIn'] = refreshExpiresIn
             resp = JsonResponse(result, status=status_code)
-
-            # Set JWT Token
-            JWTExpiry = datetime.fromtimestamp(data['payload']['exp'])
-            resp = set_cookie(
-                key='JWT_TOKEN',
-                value=data['token'],
-                expires=JWTExpiry,
-                response=resp
-            )
-            # Set JWT Refresh Token
-            resp = set_cookie(
-                key='JWT_REFRESH_TOKEN',
-                value=refreshToken.get_token(),
-                expires=refreshExpiresIn,
-                response=resp
-            )
+            resp = delete_cookie(key='JWT_REFRESH_TOKEN', response=resp)
+            resp = delete_cookie(key='JWT_TOKEN', response=resp)
             return resp
+
     return JsonResponse(result, status=status_code)
 
 

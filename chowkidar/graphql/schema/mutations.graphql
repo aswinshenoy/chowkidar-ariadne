@@ -1,6 +1,7 @@
 extend type Mutation {
 
-    tokenCreate(
+    "Authenticates a user using email/username and password"
+    authenticateUser(
         "Email address of the user"
         email: String
         "Username of the user"
@@ -8,5 +9,8 @@ extend type Mutation {
         "Password of the user"
         password: String!
     ): GenerateTokenResponse
+
+    "Logs out the current user by revoking refresh token"
+    logoutUser: Boolean
 
 }

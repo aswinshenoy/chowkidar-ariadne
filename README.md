@@ -1,13 +1,13 @@
 # Chowkidar
 ### JWT Authentication for Django Ariadne
 
-An JWT-based authentication package for django, with Ariadne GraphQL integration support.
+An JWT-based authentication package for django, with [Ariadne](https://github.com/mirumee/ariadne) GraphQL integration support.
 
 ### Features
 * Token & Refresh Token based JWT Authentication
 * Tokens stored as server-side cookie
-* Ability to Auto-Refresh JWT Token if Refresh Token Exists
-* Out-of-the-box support for Ariadne GraphQL integration
+* Ability to Auto-Refresh JWT Token if the Refresh Token Exists
+* Out-of-the-box support for [Ariadne](https://github.com/mirumee/ariadne) GraphQL integration
 * Get current logged-in user in info.context of resolvers
 
 
@@ -51,6 +51,30 @@ processors = [
 
 schema = make_executable_schema(types, *processors)
 ```
+
+**Gotcha**
+
+Your schema should already have the Mutation type, we only try to extend that type with the auth mutations.
+
+### Mutations
+```graphql
+type Mutation {
+  
+  "Authenticates a user using email/username and password"
+  authenticateUser(
+    "Email address of the user"
+    email: String
+    "Username of the user"
+    username: String
+    "Password of the user"
+    password: String!
+  ): GenerateTokenResponse
+
+  "Logs out the current user by revoking refresh token"
+  logoutUser: Boolean
+}
+```
+
 
 ### Credits
 This project is heavily inspired by django-graphql-jwt by flavors, and is loosely forked

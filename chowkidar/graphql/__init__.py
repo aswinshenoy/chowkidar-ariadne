@@ -3,6 +3,7 @@ import os
 from ariadne import load_schema_from_path
 
 from .view import *
+from .decorators import *
 from .processors import auth_mutations as am
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,5 +17,7 @@ auth_processors = [
 __all__ = [
     'GraphQLView',
     'auth_type_defs',
-    'auth_processors'
+    'auth_processors',
+    'login_required',
+    'user_passes_test'
 ]

@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(primary_key=True, serialize=False)),
                 ('token', models.CharField(editable=False, max_length=255)),
-                ('created', models.DateTimeField(auto_now_add=True)),
+                ('issued', models.DateTimeField(auto_now_add=True)),
                 ('revoked', models.DateTimeField(blank=True, null=True)),
                 ('user', models.ForeignKey(editable=False, on_delete=django.db.models.deletion.CASCADE, related_name='refresh_token', to=settings.AUTH_USER_MODEL)),
             ],

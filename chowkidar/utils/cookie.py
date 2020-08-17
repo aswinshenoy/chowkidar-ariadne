@@ -5,7 +5,7 @@ from django.http import HttpResponse,JsonResponse
 def set_cookie(
     key: str,
     value: str,
-    response: HttpResponse,
+    response: (HttpResponse or JsonResponse),
     expires: datetime,
 ) -> (HttpResponse or JsonResponse):
     """ Sets a cookie through HTTP Response """
@@ -24,8 +24,8 @@ def set_cookie(
 
 def delete_cookie(
     key: str,
-    response: HttpResponse,
-) -> HttpResponse:
+    response: (HttpResponse or JsonResponse),
+) -> (HttpResponse or JsonResponse):
     """ Deletes a cookie through HTTP Response """
     response.delete_cookie(
         key=key
