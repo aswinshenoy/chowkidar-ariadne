@@ -68,10 +68,7 @@ def decode_token(token: str) -> object:
 
 def generate_token_from_claims(claims: dict) -> object:
     payload = generate_payload_from_claims(claims)
-    return {
-        "token": encode_payload(payload),
-        "payload": payload,
-    }
+    return {"token": encode_payload(payload), "payload": payload}
 
 
 def decode_payload_from_token(token: str) -> object:

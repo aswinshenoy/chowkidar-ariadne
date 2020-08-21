@@ -7,6 +7,7 @@ An JWT-based authentication package for django, with [Ariadne](https://github.co
 * Token & Refresh Token based JWT Authentication
 * Tokens stored as server-side cookie
 * Ability to Auto-Refresh JWT Token if the Refresh Token Exists
+* Support for Social Auth with `social-app-django`
 * Out-of-the-box support for [Ariadne](https://github.com/mirumee/ariadne) GraphQL integration
 * Get current logged-in user in info.context of resolvers
 
@@ -75,6 +76,11 @@ type Mutation {
 }
 ```
 
+### Social Auth
+The type defs & processors for the Social Auth Mutations are available as follows -
+```python3
+from chowkidar.social import social_auth_type_defs, social_auth_processors
+```
 
 ### Credits
 This project is heavily inspired by django-graphql-jwt by flavors, and is loosely forked

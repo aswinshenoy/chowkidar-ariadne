@@ -1,0 +1,6 @@
+extend type Mutation {
+    socialAuth(
+        accessToken: String!
+        provider: String!
+    ): GenerateTokenResponse
+}

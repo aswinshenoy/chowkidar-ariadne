@@ -27,9 +27,7 @@ def delete_cookie(
     response: (HttpResponse or JsonResponse),
 ) -> (HttpResponse or JsonResponse):
     """ Deletes a cookie through HTTP Response """
-    response.delete_cookie(
-        key=key
-    )
+    response.delete_cookie(key=key)
     return response
 
 

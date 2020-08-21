@@ -19,5 +19,4 @@ __all__ = [
     'auth_type_defs',
     'auth_processors',
     'login_required',
-    'user_passes_test'
 ]

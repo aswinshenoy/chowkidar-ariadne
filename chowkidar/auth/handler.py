@@ -14,22 +14,40 @@ UserModel = get_user_model()
 def respond_handling_authentication(
     request: HttpRequest, result: object, status_code
 ) -> JsonResponse:
-
     if status_code == 200 and result['data']:
         # Issue Token if query is authenticateUser and successful
         if (
-                'authenticateUser' in result['data'] and
-                result['data']['authenticateUser']['success'] and
-                result['data']['authenticateUser']['user']['id']
+                (
+                    'authenticateUser' in result['data'] and
+                    'success' in result['data']['authenticateUser'] and
+                    result['data']['authenticateUser']['success'] and
+                    result['data']['authenticateUser']['user']['id']
+                ) or
+                (
+                    'socialAuth' in result['data'] and
+                    'success' in result['data']['socialAuth'] and
+                    result['data']['socialAuth']['success'] and
+                    result['data']['socialAuth']['user']['id']
+                )
         ):
-            user = UserModel.objects.get(id=result['data']['authenticateUser']['user']['id'])
-            refreshToken = generate_refresh_token(user=user)
+            if 'socialAuth' in result['data'] and result['data']['socialAuth']['success']:
+                user = result['data']['socialAuth']['user']
+                userID = user['id']
+            else:
+                user = result['data']['authenticateUser']['user']
+                userID = user['id']
+
+            refreshToken = generate_refresh_token(userID=userID)
             data = generate_token_from_claims(claims={
-                'userID': user.id, 'username': user.username, 'origIat': refreshToken.issued.timestamp(),
+                'userID': userID, 'username': user['username'], 'origIat': refreshToken.issued.timestamp(),
             })
             refreshExpiresIn = timezone.now() + JWT_REFRESH_TOKEN_EXPIRATION_DELTA
-            result['data']['authenticateUser']['payload'] = data['payload']
-            result['data']['authenticateUser']['refreshExpiresIn'] = refreshExpiresIn
+            if 'socialAuth' in result['data'] and result['data']['socialAuth']['success']:
+                result['data']['socialAuth']['payload'] = data['payload']
+                result['data']['socialAuth']['refreshExpiresIn'] = refreshExpiresIn
+            else:
+                result['data']['authenticateUser']['payload'] = data['payload']
+                result['data']['authenticateUser']['refreshExpiresIn'] = refreshExpiresIn
             resp = JsonResponse(result, status=status_code)
 
             # Set JWT Token
