@@ -16,6 +16,7 @@ auth_processors = [
 
 __all__ = [
     'GraphQLView',
+    'AuthenticatedChannel',
     'auth_type_defs',
     'auth_processors',
     'login_required',

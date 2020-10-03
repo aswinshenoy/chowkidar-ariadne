@@ -8,6 +8,7 @@ An JWT-based authentication package for django, with [Ariadne](https://github.co
 * Tokens stored as server-side cookie
 * Ability to Auto-Refresh JWT Token if the Refresh Token Exists
 * Support for Social Auth with `social-app-django`
+* Support for Authenticated GraphQL Subscriptions with Django Channels
 * Out-of-the-box support for [Ariadne](https://github.com/mirumee/ariadne) GraphQL integration
 * Get current logged-in user in info.context of resolvers
 
@@ -76,15 +77,72 @@ type Mutation {
 }
 ```
 
+#### `login_required` decorator
+
+```python3
+from chowkidar.graphql import login_required
+
+@some_resolver.field("myField")
+@login_required
+def resolve_field(self, info, sport=None, state=None, count=5, after=None):
+    some_function()
+```
+
 ### Social Auth
 The type defs & processors for the Social Auth Mutations are available as follows -
 ```python3
 from chowkidar.social import social_auth_type_defs, social_auth_processors
 ```
 
+```graphql
+mutation ($accessToken: String!){
+  socialAuth(accessToken: $accessToken, provider: "google-oauth2")
+  {
+    success
+    user
+    {
+      id
+      username
+      firstName
+      lastName
+      avatarURL
+      isVIP
+      isPremium
+    }
+  }
+}
+```
+
+### GraphQL Subscriptions with Django Channels
+
+In your `routing.py` -
+```python3 
+from django.urls import path
+
+from channels.routing import URLRouter, ProtocolTypeRouter
+
+from chowkidar.graphql import AuthenticatedChannel
+
+from .graphql.schema import schema # replace this with your schema
+
+application = ProtocolTypeRouter(
+    {
+        "websocket": (
+            URLRouter(
+                [path("ws/", AuthenticatedChannel(schema, debug=True))]
+            )
+        ),
+    }
+)
+```
+
+Doing this, you will get the logged-in user instance at `info.context['user']`,
+which you can handle as per your wish. You can also use the `@login_required` decorator
+that comes along with this package.
+
 ### Credits
-This project is heavily inspired by django-graphql-jwt by flavors, and is loosely forked
-from its implementation. 
+This project is heavily inspired by `django-graphql-jwt` & `django-graphql-social-auth` by flavors, 
+and is loosely forked from its implementation. 
 
 ### License
-This project is licensed under MIT
+This project is licensed under the MIT License (MIT)
